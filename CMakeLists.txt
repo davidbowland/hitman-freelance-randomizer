@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.24)
 # image (see scripts/build.sh). Host unit tests live in tests/ as a separate project.
 # The version is set here only (scripts/version.sh reads this line); the DLL gets it
 # as FR_VERSION.
-project(FreelancerRandomizer VERSION 1.0.0 LANGUAGES C CXX)
+project(FreelancerRandomizer VERSION 1.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
