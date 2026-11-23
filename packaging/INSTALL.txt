@@ -1,0 +1,47 @@
+Freelancer Randomizer @VERSION@ - how to install
+
+Freelancer Randomizer is a mod for HITMAN World of Assassination's Freelancer
+mode. It needs ZHMModSDK, the mod loader, installed first.
+
+1. Install ZHMModSDK, if you haven't already. Follow the instructions at
+   https://github.com/OrfeasZ/ZHMModSDK
+
+2. Close the game.
+
+3. Open the game's folder. In Steam: right-click HITMAN World of Assassination,
+   choose Manage, then Browse local files.
+   On a Steam Deck, do this in Desktop Mode.
+
+4. Copy the "Retail" folder from this zip into the game's folder. If you're asked
+   whether to replace files, choose Replace. This puts FreelancerRandomizer.dll in
+   Retail\mods.
+
+5. Start the game. Press ~ (the key under Esc) to open the SDK menu, find
+   FreelancerRandomizer in the mod list and turn it on, then restart the game.
+   The mod can't change missions until that restart.
+
+6. In the game, press ~ and click FL RANDOMIZER to see its settings.
+   On a Steam Deck, press Steam+X for the keyboard to type ~, or bind ~ to a
+   back button.
+
+Notes:
+- Some map variants need map files the mod builds from your game's own files
+  when the game starts: the first time, and again after a game or mod update,
+  this takes a few seconds. If a game update changed the files a variant needs, the
+  settings mark it (unavailable) until a mod update brings it back.
+- If you report a bug: the mod's logs hold your items, campaign seeds and file
+  paths on your PC, so check them before you share them.
+
+To update, repeat steps 2 to 4.
+
+To uninstall:
+1. Turn off "Full map variants": press ~, click FL RANDOMIZER, open the
+   Settings tab, then Maps > Map variants.
+2. Restart the game once: this removes the map files the mod made in the
+   game's Runtime folder. If you remove the mod from the SDK's mod list
+   first, those files stay, so do this step first. If you already removed
+   it: put the DLL back (or turn it back on in the SDK's mod list), turn
+   Full map variants off and restart the game once, then remove it again.
+3. Delete Retail\mods\FreelancerRandomizer.dll. To remove its settings, logs
+   and other files too, delete every file in Retail\mods whose name starts
+   with FreelancerRandomizer, in upper or lower case.

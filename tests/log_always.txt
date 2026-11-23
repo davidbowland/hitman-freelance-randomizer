@@ -1,0 +1,203 @@
+# The log lines written whatever the log switches say (FreelancerRandomizer.log).
+# Every other line goes through LogTo (a log topic's switch), LogIf (a setting) or LogError (a failure, always
+# written); see src/common/ModLog.h.
+# tests/test_log_gates.cpp checks that every raw Log( call in src/ is listed here, and every entry is still in src/.
+# One entry per call: "<path>: <the call's first line, trimmed>". Adding a line here needs a reason:
+# errors, the mod loading, the settings it read, and the load fault / crash recorder.
+
+# src/common/Guard.cpp: errors: the game's scene context could not be read
+src/common/Guard.cpp: Log("scene context: Hitman5Module not available");
+src/common/Guard.cpp: Log("scene context: fault reading it (exception 0x{:08X})", static_cast<uint32_t>(s_Code));
+
+# src/mod/ClientReqShuffle.cpp: the settings as read (config: client_reqs ...); writes to the game that faulted; hooks that threw
+src/mod/ClientReqShuffle.cpp: Log("config: client_reqs {}, client_reqs_exclude [{}], client_reqs_mode {}, "
+src/mod/ClientReqShuffle.cpp: Log("client reqs: {}: SetValue on the CPD int faulted ({})", p_Key, FaultText(s_Code));
+src/mod/ClientReqShuffle.cpp: Log("client reqs: {}: m_nValue write on the CPD int faulted ({})", p_Key, FaultText(s_Code));
+src/mod/ClientReqShuffle.cpp: Log("client reqs: {}: SetValue on the board mirror faulted ({})", p_Key, FaultText(s_Code));
+
+# src/mod/CrateGuns.cpp: the settings as read (crate guns: on: ...); hooks that threw
+src/mod/CrateGuns.cpp: Log("{}: on: {}", kTag, fr::DescribeCrateGunsConfig(m_Config));
+
+# src/mod/DoorLockShuffle.cpp: errors: writes to the game that faulted
+src/mod/DoorLockShuffle.cpp: Log("door locks: {} pin {} {}", DoorLine(p_Door), p_Value ? "LockDoor" : "UnlockDoor", FaultText(s_Code));
+
+# src/mod/EnforcerShuffle.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/EnforcerShuffle.cpp: Log("enforcers: {} at {}: {}; partially restored, scene state altered: {} of {} swapped pairs restored, {} "
+
+# src/mod/EntityWalk.cpp: errors: memory faults and type registry problems in the shared entity reader
+src/mod/EntityWalk.cpp: Log("entity walk fault in {} (exception 0x{:08X}) in brick {:016X}; skipping the rest of this brick", p_Step,
+src/mod/EntityWalk.cpp: Log("m_eParameter: {} not in the type registry; reading it raw as int32", ZHMTypeName<EDifficultyParameter>);
+src/mod/EntityWalk.cpp: Log("m_eParameter has engine type size {} or a getter; not read raw", s_Raw.typeSize);
+src/mod/EntityWalk.cpp: Log("m_eParameter: fault reading it raw (exception 0x{:08X}) in brick {:016X}", s_Raw.faultCode, p_BrickRid);
+src/mod/EntityWalk.cpp: Log("m_RepositoryId: fault reading it (exception 0x{:08X}) in brick {:016X}", s_Fault, p_BrickRid);
+src/mod/EntityWalk.cpp: Log("entity walk: factory reports {} sub-entities (outside 0 to {}) in brick {:016X}; skipping this "
+src/mod/EntityWalk.cpp: Log("type {} not in registry; properties of this type are not read", p_TypeName);
+src/mod/EntityWalk.cpp: Log("type registry not available; properties of type {} are not read", p_TypeName);
+src/mod/EntityWalk.cpp: Log("property {}: reading it faulted ({}); value not read", p_Name, FaultText(p_Code));
+src/mod/EntityWalk.cpp: Log("property {} has engine type {} (expected {}); value not read", p_Name, s_Actual, p_Expected);
+src/mod/EntityWalk.cpp: Log("type {} not in the type registry; matching by class name only", kDifficultyEntityClass);
+
+# src/mod/FreelancerRandomizer.cpp: the mod loading (version, hooks added), the settings it read (config:, settings: lines and their warnings), persisted values it could not read, and the mod enabled too late
+src/mod/FreelancerRandomizer.cpp: Log("mod unload: {} entity values and {} pro.repo values still patched after the restore",
+src/mod/FreelancerRandomizer.cpp: Log("FreelancerRandomizer {} loaded (SDK {}): disabled; no hooks added (to enable, set enabled = true "
+src/mod/FreelancerRandomizer.cpp: Log("FreelancerRandomizer {} loaded (SDK {})", kVersion, ZHMMODSDK_VER);
+src/mod/FreelancerRandomizer.cpp: Log("detour added (the full map variants' packages): IPackageManager_SPartitionInfo_SPartitionInfo");
+src/mod/FreelancerRandomizer.cpp: Log("detours added: ZEvergreenCampaignManager_OnGenerate, ZEntitySceneContext_LoadScene, "
+src/mod/FreelancerRandomizer.cpp: Log("note: this mod must be enabled in mods.ini before the game starts; enabled later from the in-game "
+src/mod/FreelancerRandomizer.cpp: Log("settings: {} = {} is outside 0..100; using {}", fr::VariantChanceKey(*s_Option), s_Percent, s_Clamped);
+src/mod/FreelancerRandomizer.cpp: Log("config: log_safe_spots {}", m_Config.logSafeSpots);
+src/mod/FreelancerRandomizer.cpp: Log("config: loot_amounts {} (vault {}-{}, safe {}-{}, crate {}-{}, mule {}-{})", m_Config.lootAmounts,
+src/mod/FreelancerRandomizer.cpp: Log("config: supplier_steer {}, supplier_steer_gear {}, supplier_force_pick {}", m_Config.supplierSteer,
+src/mod/FreelancerRandomizer.cpp: Log("settings: variant_force = \"{}\" is not one of {}; ignored", s_Force.ToStringView(),
+src/mod/FreelancerRandomizer.cpp: Log("config: log switches off: [{}]", s_LogsOff);
+src/mod/FreelancerRandomizer.cpp: Log("settings: changed in the overlay; reading {} again ({})", kSettingsFile, p_When);
+src/mod/FreelancerRandomizer.cpp: Log("detour added for loot_amounts / fishing_script / prestige_shuffle / lockpick_grant / grant_* / variants: "
+src/mod/FreelancerRandomizer.cpp: Log("detour added for loot_amounts / crate_guns / supplier_steer / supplier_force_pick: "
+src/mod/FreelancerRandomizer.cpp: Log("detour added for footsteps_investigate / backup_guard: SignalInputPin");
+src/mod/FreelancerRandomizer.cpp: Log("settings: {} = \"{}\" (set in the overlay; used {})", p_Info.key, p_Text,
+src/mod/FreelancerRandomizer.cpp: Log("settings: {}: the loader's default {} is not the settings table's {} (fix src/core/SettingsTable.cpp)",
+src/mod/FreelancerRandomizer.cpp: Log("settings: loot_amount_{0}_min {1} / loot_amount_{0}_max {2} used as {3} / {4} ({5})",
+src/mod/FreelancerRandomizer.cpp: Log("settings: client_reqs_exclude entry \"{}\" is not a requirement id; ignored", s_Entry);
+src/mod/FreelancerRandomizer.cpp: Log("settings: client_reqs_exclude \"{}\" leaves fewer than {} common objectives to pick from; using the "
+src/mod/FreelancerRandomizer.cpp: Log("settings: client_reqs_mode = \"{}\" is not campaign or mission; using {}", s_Mode.ToStringView(),
+src/mod/FreelancerRandomizer.cpp: Log("settings: client_reqs_pool_size = {}: using the default {}", m_Config.clientReqsPoolSize,
+src/mod/FreelancerRandomizer.cpp: Log("settings: weapon_rarity_keep_min {} / weapon_rarity_keep_max {} adjusted to {} / {} (each 0% to 100%, "
+src/mod/FreelancerRandomizer.cpp: Log("config: weapon_rarity {}, weapon_rarity_keep_min {}, weapon_rarity_keep_max {}, weapon_rarity_capacity {}, "
+src/mod/FreelancerRandomizer.cpp: Log("config: legal_sniper_rifles {}", m_Config.legalSniperRifles);
+src/mod/FreelancerRandomizer.cpp: Log("settings: random_loadout_delay = {} is outside 0..60 seconds; using 1", s_Delay);
+src/mod/FreelancerRandomizer.cpp: Log("config: random_loadout {}, random_loadout_delay {}, random_loadout_holsterable_only {}, "
+src/mod/FreelancerRandomizer.cpp: Log("config: grant_makeshift_explosive {}, grant_lethal_poison {}, grant_coin {}", m_Config.grantMakeshiftExplosive,
+src/mod/FreelancerRandomizer.cpp: Log("config: safehouse_coin {}", m_Config.safehouseCoin);
+src/mod/FreelancerRandomizer.cpp: Log("config: fishing_script {}", m_Config.fishingScript);
+src/mod/FreelancerRandomizer.cpp: Log("settings: footsteps_investigate_chance {} is outside 0-100; using {}", s_Chance,
+src/mod/FreelancerRandomizer.cpp: Log("config: footsteps_investigate {}, footsteps_investigate_chance {}%, backup_guard {} ({}-{} s after the call, "
+src/mod/FreelancerRandomizer.cpp: Log("settings: backup_guard_delay_min {} / backup_guard_delay_max {} are outside 0-{} or max is below min; "
+src/mod/FreelancerRandomizer.cpp: Log("settings: prestige_exclude entry \"{}\" is not an objective id; ignored", s_Entry);
+src/mod/FreelancerRandomizer.cpp: Log("settings: prestige_exclude entry {} is not a prestige objective the shuffle can draw; ignored",
+src/mod/FreelancerRandomizer.cpp: Log("settings: prestige_exclude \"{}\" leaves too few objectives for three cards (card A takes only a "
+src/mod/FreelancerRandomizer.cpp: Log("prestige shuffle: persisted state \"{}\" is not \"<seed> <counter> <taken 0|1>\"; starting over",
+src/mod/FreelancerRandomizer.cpp: Log("config: prestige_shuffle {} (pick state {}), prestige_exclude [{}]", m_Config.prestigeShuffle,
+src/mod/FreelancerRandomizer.cpp: Log("settings: lockpick_grant = \"{}\" is not off, slow_lockpick or nails; using nails",
+src/mod/FreelancerRandomizer.cpp: Log("settings: lockpick_nails {} is outside {}-{}; using {}", s_Nails, fr::kMinLockpickNails,
+src/mod/FreelancerRandomizer.cpp: Log("settings: lockpick_slow_picks {} is outside {}-{}; using {}", s_Picks, fr::kMinLockpickSlowPicks,
+src/mod/FreelancerRandomizer.cpp: Log("config: lockpick_grant {}, lockpick_nails {}, lockpick_slow_picks {}", m_Config.lockpickGrant,
+src/mod/FreelancerRandomizer.cpp: Log("settings: invalid payout values reset to defaults (loaded payout_sigma {} payout_min {} payout_max {} "
+src/mod/FreelancerRandomizer.cpp: Log("config: payouts {}, payout_sigma {}, payout_lean {}, payout_min {}, payout_max {}, payout_jackpot_chance {}, "
+src/mod/FreelancerRandomizer.cpp: Log("settings: {} = \"{}\" is not a boolean; using {}", p_Key, GetSetting(kSettings, p_Key, "").ToStringView(),
+src/mod/FreelancerRandomizer.cpp: Log("settings: invalid footstep roll values reset to defaults (loaded footsteps_sigma {} footsteps_lean {} "
+src/mod/FreelancerRandomizer.cpp: Log("settings: footsteps_{}_range = {} is not a range above 0; using {}", s_Key, s_Steps.range[i],
+src/mod/FreelancerRandomizer.cpp: Log("config: footsteps {}: {}; roll sigma {} lean {} min {} max {}", m_Config.footsteps.on, s_Gaits, s_Roll.sigma,
+src/mod/FreelancerRandomizer.cpp: Log("settings: unknown sensor dial \"{}\" in sensor_dials_off; ignored", s_Key);
+src/mod/FreelancerRandomizer.cpp: Log("settings: sick_spot_kill_boost = {} is outside 0..{}; using {}", s_Boost, fr::kSickBoostMax,
+src/mod/FreelancerRandomizer.cpp: Log("config: sick_spot_kills {}, sick_spot_kill_boost {}", m_Config.sickSpotKills, m_Config.sickSpotKillBoost);
+src/mod/FreelancerRandomizer.cpp: Log("settings: {} = \"{}\" is not a number; using {}", p_Key, s_Raw.ToStringView(), p_Default);
+src/mod/FreelancerRandomizer.cpp: Log("settings: {} = \"{}\" is not a 32-bit integer; using {}", p_Key, s_Raw.ToStringView(), p_Default);
+src/mod/FreelancerRandomizer.cpp: Log("persisted seed \"{}\" is not a 32-bit integer; ignored", s_Text);
+src/mod/FreelancerRandomizer.cpp: Log("client reqs: persisted client_reqs_pending \"{}\" is not the persisted campaign seed ({}); dropped",
+src/mod/FreelancerRandomizer.cpp: Log("merces: persisted prestige_bonus \"{}\" is not a non-negative 32-bit integer; ignored", s_Text);
+src/mod/FreelancerRandomizer.cpp: Log("merces: persisted {} entry \"{}\" is not an entity id; ignored", s_Key, s_Entry);
+src/mod/FreelancerRandomizer.cpp: Log("merces: persisted id {:016x} is in both prestige_ids and normal_ids; ignored", *s_It);
+src/mod/FreelancerRandomizer.cpp: Log("{}", kStageNotReached);
+src/mod/FreelancerRandomizer.cpp: Log("config: crate_items {} (unloaded {}, even boxes {}, level items {}), crate_guns {}", m_Config.crateItems.on,
+src/mod/FreelancerRandomizer.cpp: Log("config: door_locks {}, door_locks_share_min {}, door_locks_share_max {}", m_Config.doorLocks,
+src/mod/FreelancerRandomizer.cpp: Log("config: enabled true, dials {}, guard_weapons {}, variants {}, full_map_variants {}, variant chances [{}], "
+src/mod/FreelancerRandomizer.cpp: Log("config: enforcers {}, enforcers_share_min {}, enforcers_share_max {}, enforcers_any_brick {}, "
+src/mod/FreelancerRandomizer.cpp: Log("config: sensor_dials {}, sensor_dials_off [{}]", m_Config.sensorDials, s_OffKeys);
+src/mod/FreelancerRandomizer.cpp: Log("config: target_pool {}, target_pool_swap_min {}, target_pool_swap_max {}, target_pool_any_guard {}",
+src/mod/FreelancerRandomizer.cpp: Log("settings: invalid AI difficulty roll values reset to defaults (loaded dials_sigma {} dials_lean {} "
+src/mod/FreelancerRandomizer.cpp: Log("settings: unknown parameter \"{}\" in dials_off; ignored", s_Name);
+
+# src/mod/LandslidePackage.cpp: the full map variants' package install (a variant the game's files can't build) and its crash recorder (a load that never finished turns the full version off); errors
+src/mod/LandslidePackage.cpp: Log("{}: full version can't be built from the game's files ({}){}; missions never pick it", s_Keys[i],
+src/mod/LandslidePackage.cpp: Log("{}: full version turned off: the last {} load did not finish (crash or quit while loading; {} {}). "
+src/mod/LandslidePackage.cpp: Log("{}: not installed: {}", s_Log, s_WriteError);
+src/mod/LandslidePackage.cpp: Log("{}: could not write the crash sentinel: {}; a crash during this load will not turn the full version "
+src/mod/LandslidePackage.cpp: Log("{}: could not remove the crash sentinel {}: {}; the next game start will turn the full version off",
+
+# src/mod/LegalSniperKits.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/LegalSniperKits.cpp: Log("legal sniper rifles: {}: failed: {}", p_When, e.what());
+src/mod/LegalSniperKits.cpp: Log("legal sniper rifles: {}: failed: unknown exception", p_When);
+src/mod/LegalSniperKits.cpp: Log("legal sniper rifles: {}: restore failed: {}", p_When, e.what());
+src/mod/LegalSniperKits.cpp: Log("legal sniper rifles: {}: restore failed: unknown exception", p_When);
+
+# src/mod/LoadFaultWatch.cpp: the load fault recorder: faults during a full map variant load, and the last session's unfinished load
+src/mod/LoadFaultWatch.cpp: Log("load fault (last session): {}", s_Line);
+src/mod/LoadFaultWatch.cpp: Log("load fault (last session): the game ended while a full map variant was loading; {} lines above, from {} "
+src/mod/LoadFaultWatch.cpp: Log("load fault watch: ready ({}); full map variant loads are watched",
+src/mod/LoadFaultWatch.cpp: Log("load fault watch: {}: watching the load ({}{})", g_Load,
+src/mod/LoadFaultWatch.cpp: Log("load fault watch: {}: {}: {} faults outside the mod while loading{}{}, {} blueprint factories built",
+src/mod/LoadFaultWatch.cpp: Log("load fault watch: {}", g_Lines[i]);
+src/mod/LoadFaultWatch.cpp: Log("load fault watch: {}: the mod's {} handlers are done ({} blueprint factories built so far); the game "
+
+# src/mod/MaceConceal.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: \"{}\": the write FAULTED (exception 0x{:08X})", p_When, s_Mace.title,
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: failed: {}", p_When, e.what());
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: failed: unknown exception", p_When);
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: the pro.repo scan faulted (exception 0x{:08X}); nothing put back", p_When,
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: restore failed: {}", p_When, e.what());
+src/mod/MaceConceal.cpp: Log("concealable mace: {}: restore failed: unknown exception", p_When);
+
+# src/mod/MercesPayouts.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/MercesPayouts.cpp: Log("{}: {} {} -> {}: {}", s_Tag, s_Label, s_Child.start, s_Plan.target, FaultText(s_Code));
+src/mod/MercesPayouts.cpp: Log("{}: {} {} -> {}: write failed", s_Tag, s_Label, s_Child.start, s_Plan.target);
+src/mod/MercesPayouts.cpp: Log("merces prestige wall pin: {} emits {}: rewriting the signal: {}", s_Label, p_Value, FaultText(s_Code));
+
+# src/mod/MoneyItems.cpp: the setting as read (loot amounts: on: ...); hooks that threw
+src/mod/MoneyItems.cpp: Log("loot amounts: on: money items in Freelancer missions get their own amount (multiples of {}): {}",
+
+# src/mod/PrestigeShuffle.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/PrestigeShuffle.cpp: Log("prestige shuffle: GUARD: signaling SignalFork_Void .In {}", FaultText(s_Code));
+src/mod/PrestigeShuffle.cpp: Log("prestige shuffle: GUARD: signaling Picker1 .Pick {}", FaultText(s_Code));
+
+# src/mod/EntityReads.cpp: errors: a memory fault in the shared property reader
+src/mod/EntityReads.cpp: Log("float property {:08x}: getter faulted (exception 0x{:08X})", s_Entry.id,
+
+# src/mod/RandomLoadout.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/RandomLoadout.cpp: Log("loadout: state not saved ({}): the mods folder is unknown", p_Why);
+src/mod/RandomLoadout.cpp: Log("loadout: could not write {} ({})", s_Path.string(), p_Why);
+
+# src/mod/RepoPatch.cpp: errors: pro.repo values that could not be written or restored (the game stays changed)
+src/mod/RepoPatch.cpp: Log("restore: {} {:.9g} -> {:.9g}: write failed", fr::ParamLabel(s_Patch.tag), *s_Param->value,
+src/mod/RepoPatch.cpp: Log("restore pro.repo: {}; {} values stay patched (retried before the next scene is patched)", s_Why,
+src/mod/RepoPatch.cpp: Log("restore pro.repo: lookup faulted (exception 0x{:08X}); {} values stay patched", s_Code,
+src/mod/RepoPatch.cpp: Log("restore pro.repo {} ({}) Toggle: write fault (exception 0x{:08X})",
+src/mod/RepoPatch.cpp: Log("restore pro.repo {} ({}): write fault (exception 0x{:08X})", fr::FormatGuid(s_Keys[i]),
+src/mod/RepoPatch.cpp: Log("{} pro.repo {}: write fault (exception 0x{:08X})", ParamLabel(s_Param), fr::FormatGuid(s_Entry.guid),
+
+# src/mod/Repository.cpp: errors: memory faults scanning pro.repo
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before a lookup pass (exception 0x{:08X}); nothing looked up",
+src/mod/Repository.cpp: Log("pro.repo: fault: a lookup pass visited more than {} + 1 entries (the map's links are broken); "
+src/mod/Repository.cpp: Log("pro.repo: fault during a lookup pass (exception 0x{:08X}); results of that pass are partial",
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before a Parameter scan (exception 0x{:08X}); nothing scanned",
+src/mod/Repository.cpp: Log("pro.repo: fault: a Parameter scan visited more than {} + 1 entries (the map's links are broken); "
+src/mod/Repository.cpp: Log("pro.repo: fault during a Parameter scan (exception 0x{:08X}) after {} entries; results are partial",
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before an item scan (exception 0x{:08X}); nothing scanned",
+src/mod/Repository.cpp: Log("pro.repo: fault: an item scan visited more than {} + 1 entries (the map's links are broken); stopped, "
+src/mod/Repository.cpp: Log("pro.repo: fault during an item scan (exception 0x{:08X}) after {} entries; results are partial",
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before a rarity scan (exception 0x{:08X}); nothing scanned",
+src/mod/Repository.cpp: Log("pro.repo: fault: a rarity scan visited more than {} + 1 entries (the map's links are broken); "
+src/mod/Repository.cpp: Log("pro.repo: fault during a rarity scan (exception 0x{:08X}) after {} entries; results are partial",
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before a loadout item scan (exception 0x{:08X}); nothing scanned",
+src/mod/Repository.cpp: Log("pro.repo: fault: a loadout item scan visited more than {} + 1 entries (the map's links are broken); "
+src/mod/Repository.cpp: Log("pro.repo: fault during a loadout item scan (exception 0x{:08X}) after {} entries; results are partial",
+src/mod/Repository.cpp: Log("pro.repo: fault reading the entry count before a conceal item scan (exception 0x{:08X}); nothing scanned",
+src/mod/Repository.cpp: Log("pro.repo: fault: a conceal item scan visited more than {} + 1 entries (the map's links are broken); "
+src/mod/Repository.cpp: Log("pro.repo: fault during a conceal item scan (exception 0x{:08X}) after {} entries; results are partial",
+
+
+# src/mod/SensorDials.cpp: errors: guard senses that could not be restored (the game stays changed); hooks that threw
+src/mod/SensorDials.cpp: Log("sensor dials restore: {} unreadable; left alone", s_Dial.key);
+src/mod/SensorDials.cpp: Log("sensor dials restore: {} {:.9g} -> {:.9g}: write failed", s_Dial.key, s_Now,
+
+# src/mod/VariantExits.cpp: an exit that waited out its time or faulted
+src/mod/VariantExits.cpp: Log("{}", s_Text);
+
+# src/mod/Variants.cpp: errors: writes to the game that faulted or left it changed
+src/mod/Variants.cpp: Log("variant: appending {}: {}; the brick list may be damaged; {} of {} bricks added", s_Path,
+src/mod/Variants.cpp: Log("{}: full version: swapping the scene: {}; the load parameters may be damaged", p_Variant.key,
+
+# src/mod/WeaponRarityShuffle.cpp: errors: hooks that threw, and writes to the game that faulted or left it changed
+src/mod/WeaponRarityShuffle.cpp: Log("weapon rarity: {}: restore failed: {}", p_When, e.what());
+src/mod/WeaponRarityShuffle.cpp: Log("weapon rarity: {}: restore failed: unknown exception", p_When);
+src/mod/WeaponRarityShuffle.cpp: Log("weapon rarity: {}: failed: {}", p_When, e.what());
+src/mod/WeaponRarityShuffle.cpp: Log("weapon rarity: {}: failed: unknown exception", p_When);

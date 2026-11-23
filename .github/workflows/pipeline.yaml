@@ -1,0 +1,145 @@
+name: Pipeline
+
+# Every push tests and builds, and uploads the DLL, the PDB and the player package as artifacts.
+# A push to main also releases: it publishes the version CMakeLists.txt sets as a GitHub
+# Release (tag v<version>), then bumps the minor version for the next one.
+# The DLL carries only the full map variants' recipes (src/mod/LandslideRecipes.inc) and
+# builds their packages from the player's game files at game start.
+on: push
+
+# Read-only by default; only the release job writes. Actions are pinned to commits (the tag
+# each one was at is in the comment).
+permissions:
+  contents: read
+
+# One run per ref at a time; a newer push to a branch other than main cancels the older run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+jobs:
+  build:
+    name: Test, build and package
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      # The Python tools' self-tests use synthetic data only (no game files). Every directory
+      # with a tracked test_*.py runs its own discovery.
+      - name: Run tool tests
+        run: |
+          dirs="$(git ls-files ':(glob)**/test_*.py' | xargs -n1 dirname | sort -u)"
+          if [ -z "${dirs}" ]; then
+            echo "No tool tests found" >&2
+            exit 1
+          fi
+          for d in ${dirs}; do
+            python3 -I -m unittest discover -s "$d" -p 'test_*.py'
+          done
+
+      # The scripts fetch the DevPkg themselves. The first step builds the Docker image from
+      # scratch (no layer cache between runs, so it downloads the Windows SDK every time);
+      # the later steps reuse that image.
+      - name: Run unit tests
+        run: scripts/test.sh
+
+      # GCC 13's TSan and ASan crash on runner kernels that use 32 bits of mmap ASLR entropy.
+      - name: Lower ASLR entropy for the sanitizers
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
+
+      # test.sh sets UBSAN_OPTIONS (halt_on_error, print_stacktrace).
+      - name: Run unit tests (address and undefined behavior sanitizers)
+        run: scripts/test.sh
+        env:
+          FR_SANITIZE: address,undefined
+
+      - name: Run unit tests (thread sanitizer)
+        run: scripts/test.sh
+        env:
+          FR_SANITIZE: thread
+
+      # No DWARF in the release DLL; its debug info is in FreelancerRandomizer.pdb.
+      - name: Build the DLL
+        run: scripts/build.sh
+        env:
+          FR_DWARF: "OFF"
+
+      # The players' download: Retail/mods/FreelancerRandomizer.dll and install steps.
+      - name: Package for players
+        run: scripts/package.sh
+
+      # After the build, so a formatting failure doesn't hide the test and build results.
+      - name: Check formatting
+        run: scripts/format.sh --check
+
+      - name: Upload FreelancerRandomizer.dll
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: FreelancerRandomizer
+          path: build/FreelancerRandomizer.dll
+          if-no-files-found: error
+
+      - name: Upload the player package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: FreelancerRandomizer-package
+          path: build/FreelancerRandomizer-*.zip
+          if-no-files-found: error
+
+      - name: Upload FreelancerRandomizer.pdb
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: FreelancerRandomizer-pdb
+          path: build/FreelancerRandomizer.pdb
+          if-no-files-found: error
+
+  release:
+    name: Release and bump the version number
+    if: github.ref == 'refs/heads/main'
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout latest code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Download the build
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: FreelancerRandomizer*
+          path: release
+          merge-multiple: true
+
+      # The DLL reports the version it was built with, so the release uses that one. An
+      # existing tag fails the job rather than replacing a release.
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(scripts/version.sh)"
+          gh release create "v${version}" --target "${GITHUB_SHA}" --title "Freelancer Randomizer ${version}" \
+            --generate-notes release/FreelancerRandomizer-*.zip release/FreelancerRandomizer.dll \
+            release/FreelancerRandomizer.pdb
+
+      - name: Set git name and email
+        env:
+          GIT_EMAIL: ${{ secrets.GIT_EMAIL }}
+        run: |
+          git config --local user.email "${GIT_EMAIL:-41898282+github-actions[bot]@users.noreply.github.com}"
+          git config --local user.name "github-actions[bot]"
+
+      # A push with the workflow's token starts no new run.
+      - name: Bump the minor version
+        run: |
+          next="$(scripts/version.sh --next-minor)"
+          sed -i "s/^project(FreelancerRandomizer VERSION [0-9.]* /project(FreelancerRandomizer VERSION ${next} /" \
+            CMakeLists.txt
+          test "$(scripts/version.sh)" = "${next}"
+          git commit -am "${next}"
+          git push origin HEAD:main

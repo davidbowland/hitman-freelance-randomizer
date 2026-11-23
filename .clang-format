@@ -1,0 +1,45 @@
+# Applied by scripts/format.sh.
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: Latest
+UseTab: Never
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+
+# Braces on the same line everywhere; } else and } catch break before the keyword.
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeCatch: true
+  BeforeElse: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+NamespaceIndentation: None
+FixNamespaceComments: false
+IndentCaseLabels: true
+AccessModifierOffset: -4
+
+PointerAlignment: Left
+DerivePointerAlignment: false
+SpaceBeforeCpp11BracedList: true
+Cpp11BracedListStyle: true
+
+# Bodies on one line only for functions defined in a class and for lambdas that fit;
+# an if or a loop body always goes on its own line.
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Empty
+AllowShortLambdasOnASingleLine: All
+AlwaysBreakTemplateDeclarations: Yes
+
+# Include order is left alone: Windows and SDK headers depend on it.
+SortIncludes: Never
+IncludeBlocks: Preserve
+
+# Comments are wrapped by hand.
+ReflowComments: false
+MaxEmptyLinesToKeep: 1
+KeepEmptyLinesAtTheStartOfBlocks: false
